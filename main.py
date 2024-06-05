@@ -1,14 +1,14 @@
 import psycopg2
-from app.utils import get_all_constellations, get_all_stars, save_star_symbols, load_star_symbols
-from app.menu import display_menu, show_all_stars, change_star_symbols, get_star_details
+from app.utils import load_star_symbols
+from app.menu import display_menu, show_star_map, change_star_symbols, get_star_details
 
 def main():
     conn = psycopg2.connect(
-        host="178.154.231.252",
+        host="195.80.51.6",
         port="5432",
-        database="db_user10",
-        user="user10",
-        password="password10"
+        database="postgres",
+        user="postgres",
+        password="123"
     )
     cursor = conn.cursor()
 
@@ -19,7 +19,7 @@ def main():
         choice = input("Выберите действие: ")
 
         if choice == '1':
-            show_all_stars(cursor, star_symbols)
+            show_star_map(cursor, star_symbols)
         elif choice == '2':
             star_symbols = change_star_symbols()
         elif choice == '3':
@@ -31,7 +31,6 @@ def main():
             print("Неверный выбор. Пожалуйста, выберите действие из меню.")
 
     conn.close()
-
 
 if __name__ == "__main__":
     main()

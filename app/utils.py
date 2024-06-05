@@ -1,5 +1,8 @@
 import json
 from app.classes import Constellation, Star
+import shutil
+import random
+import string
 
 def load_star_symbols():
     try:
@@ -20,30 +23,41 @@ def get_all_stars(cursor):
     cursor.execute("SELECT id, name, x_coordinate, y_coordinate, description, constellation_id, size FROM stars")
     return [Star(*row) for row in cursor.fetchall()]
 
-def display_stars(stars, constellations, star_symbols):
-    constellation_map = {c.id: c.name for c in constellations}
+def display_star_map(stars, star_symbols):
+    # Определяем размеры консоли
+    console_size = shutil.get_terminal_size((80, 20))
+    console_width, console_height = console_size.columns - 2, console_size.lines - 4
 
-    stars_by_constellation = {}
+    # Определяем размеры карты на основе координат звезд
+    min_x, max_x = min(star.x for star in stars), max(star.x for star in stars)
+    min_y, max_y = min(star.y for star in stars), max(star.y for star in stars)
+    star_map_width = max_x - min_x
+    star_map_height = max_y - min_y
+
+    # Рассчитываем масштаб, чтобы звезды уместились на карте
+    scale_x = console_width / star_map_width if star_map_width > 0 else 1
+    scale_y = console_height / star_map_height if star_map_height > 0 else 1
+    scale = min(scale_x, scale_y)
+
+    # Создаем пустую карту
+    sky_map = [[" " for _ in range(console_width)] for _ in range(console_height)]
+
+    # Заполняем карту звездами и их названиями
     for star in stars:
-        if star.constellation_id not in stars_by_constellation:
-            stars_by_constellation[star.constellation_id] = []
-        stars_by_constellation[star.constellation_id].append(star)
+        symbol = star_symbols.get(star.size, '*')
+        x = int((star.x - min_x) * scale)
+        y = int((star.y - min_y) * scale)
 
-    # Отображение звезд в рамке
-    print("\n+" + "-"*78 + "+")
-    for const_id, stars_list in stars_by_constellation.items():
-        const_name = constellation_map[const_id]
-        print(f"|{const_name.center(78)}|")
-        for star in stars_list:
-            symbol = star_symbols.get(star.size, '*')
-            star_info = f" {symbol} {star.name:<20} ({star.x:.4f}, {star.y:.4f}) "
-            padding = 78 - len(star_info) - 2
-            print(f"| {star_info}{' ' * padding}|")
-    print("+" + "-"*78 + "+")
+        if 0 <= x < console_width and 0 <= y < console_height:
+            sky_map[y][x] = f"{symbol}-{star.name}"
 
-    # Отображение подробной информации о звездах
-    for i, star in enumerate(stars, start=1):
-        const_name = constellation_map[star.constellation_id]
-        desc = star.description if len(star.description) <= 60 else star.description[:57] + "..."
-        print(f"{i:2}. {star.name:<20} {const_name:<15} {desc}")
+    # Отображение карты
+    print("\n+" + "-" * console_width + "+")
+    for row in sky_map:
+        # Выравниваем содержимое по обоим краям
+        aligned_row = f"{''.join(row)}"
 
+        # Отображение строки с закрытием справа
+        print("|" + aligned_row.rjust(console_width, '|') + "|")
+
+    print("+" + "-" * console_width + "+")

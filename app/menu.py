@@ -1,16 +1,16 @@
-from app.utils import get_all_constellations, get_all_stars, display_stars, save_star_symbols
+import textwrap
+from app.utils import get_all_constellations, get_all_stars, save_star_symbols, display_star_map
 
 def display_menu():
     print("\nМеню:")
-    print("1. Показать все звезды")
+    print("1. Показать карту звездного неба")
     print("2. Изменить символы отображения звезд")
     print("3. Получить подробную информацию о звезде")
     print("4. Выйти")
 
-def show_all_stars(cursor, star_symbols):
-    constellations = get_all_constellations(cursor)
+def show_star_map(cursor, star_symbols):
     stars = get_all_stars(cursor)
-    display_stars(stars, constellations, star_symbols)
+    display_star_map(stars, star_symbols)
 
 def change_star_symbols():
     new_symbols = {}
@@ -38,9 +38,9 @@ def get_star_details(cursor):
         const_name = next(c.name for c in constellations if c.id == selected_star.constellation_id)
         const_desc = next(c.description for c in constellations if c.id == selected_star.constellation_id)
         print(f"\nНазвание звезды: {selected_star.name}")
-        print(f"Полное описание: {selected_star.description}")
+        print(f"Полное описание: {textwrap.fill(selected_star.description, width=80)}")
         print(f"Координаты: ({selected_star.x}, {selected_star.y})")
         print(f"Созвездие: {const_name}")
-        print(f"Описание созвездия: {const_desc}")
+        print(f"Описание созвездия: {textwrap.fill(const_desc, width=80)}")
     else:
         print("Звезда не найдена.")
