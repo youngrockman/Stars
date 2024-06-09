@@ -48,16 +48,20 @@ def display_star_map(stars, star_symbols):
         x = int((star.x - min_x) * scale)
         y = int((star.y - min_y) * scale)
 
+        star_representation = f"{symbol}-{star.name}"
+
         if 0 <= x < console_width and 0 <= y < console_height:
-            sky_map[y][x] = f"{symbol}-{star.name}"
+            # Проверка, не выходит ли звезда за пределы карты
+            if x + len(star_representation) > console_width:
+                star_representation = star_representation[:console_width - x]
+
+            for i, char in enumerate(star_representation):
+                if x + i < console_width:
+                    sky_map[y][x + i] = char
 
     # Отображение карты
     print("\n+" + "-" * console_width + "+")
     for row in sky_map:
-        # Выравниваем содержимое по обоим краям
-        aligned_row = f"{''.join(row)}"
-
-        # Отображение строки с закрытием справа
-        print("|" + aligned_row.rjust(console_width, '|') + "|")
-
+        aligned_row = ''.join(row)
+        print("|" + aligned_row.ljust(console_width) + "|")
     print("+" + "-" * console_width + "+")

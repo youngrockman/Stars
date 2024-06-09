@@ -24,7 +24,7 @@ def get_star_details(cursor):
     stars = get_all_stars(cursor)
     constellations = get_all_constellations(cursor)
 
-    user_input = input("Введите порядковый номер или название звезды: ")
+    user_input = input("Введите название звезды: ")
     selected_star = None
 
     if user_input.isdigit():
